@@ -1,6 +1,6 @@
 export default class Keyboard {
     constructor(targets) {
-        this.listeners = targets
+        this.listeners = targets ?? []
     }
 
     subscribe(target) {

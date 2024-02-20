@@ -1,29 +1,30 @@
 import Keyboard from "./classes/keyboard.js";
-import Game from "./classes/game.js";
+import ScreenManager from "./classes/screenManager.js";
+import { game } from "./screens/game.js";
 
 const mainElement = document.querySelector('main');
 const canvas = {};
 canvas.element = document.querySelector('main > canvas');
-canvas.context = canvas.element.getContext('2d')
+canvas.context = canvas.element.getContext('2d');
 
-const game = new Game(canvas);
-const keyboardHandler = new Keyboard([game])
+export const screenManager = new ScreenManager(canvas);
+export const keyboardHandler = new Keyboard([screenManager]);
+screenManager.subscribe(game)
 
-function load() {
-    const { element } = canvas
+window.addEventListener("load", setSize);
+window.addEventListener("resize", setSize);
+window.addEventListener("keydown", e => keyboardHandler.listener(e));
+
+function setSize() {
+    const { element } = canvas;
     const size = (() => {
-        let temp = Math.min(mainElement.offsetHeight, mainElement.offsetWidth) * 0.9
-        return temp - temp % 50
+        let temp = Math.min(mainElement.offsetHeight, mainElement.offsetWidth) * 0.9;
+        return temp - temp % 50;
     })()
-    element.width = element.height = size
-    game.setSize(canvas)
+    element.width = element.height = size;
+    screenManager.setSize();
 }
 
-window.addEventListener("load", load);
-window.addEventListener("resize", () => {
-    load()
-    game.setSize(canvas);
-});
-window.addEventListener("keydown", e => keyboardHandler.listener(event))
-
-const intervalId = setInterval(() => game.interval(), 300)
+const intervalId = setInterval(() => {
+    screenManager.update();
+}, 10)
