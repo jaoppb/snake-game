@@ -1,6 +1,6 @@
 export default class Game {
     constructor() {
-        this.ups = 3 //updates per second
+        this.ups = 3; //updates per second
         this.running = true;
         this.pixel = {};
         this.pixel.size = 50;
@@ -25,11 +25,11 @@ export default class Game {
         this.grow = false;
     }
 
-    getRandomInt = range => Math.floor(Math.random() * range)
+    getRandomInt = range => Math.floor(Math.random() * range);
 
-    getRandomVector2 = range => [this.getRandomInt(range), this.getRandomInt(range)]
+    getRandomVector2 = range => [this.getRandomInt(range), this.getRandomInt(range)];
 
-    getColor = target => this.colors[target] ?? this.colors.default
+    getColor = target => this.colors[target] ?? this.colors.default;
 
     keyboard(event) {
         const key = event.key.toLowerCase();
@@ -38,13 +38,13 @@ export default class Game {
             case "a":
             case "s":
             case "d":
-                this.requestDirectionChange(this.directions[key])
-                break;
+                this.requestDirectionChange(this.directions[key]);
+            break;
         }
     }
 
     requestDirectionChange(newDir) {
-        if (!newDir.map(v => -v).every((v, i) => v !== this.direction[i])) return
+        if (!newDir.map(v => -v).every((v, i) => v !== this.direction[i])) return;
 
         this.requestedDirection = newDir;
     }
@@ -63,12 +63,12 @@ export default class Game {
     }
 
     generateNewFruit() {
-        do this.fruit = this.getRandomVector2(this.size.pixel)
-        while ([this.player.head, ...this.player.tail].some(v => v.every((v, i) => v == this.fruit[i])))
+        do this.fruit = this.getRandomVector2(this.size.pixel);
+        while ([this.player.head, ...this.player.tail].some(v => v.every((v, i) => v == this.fruit[i])));
     }
 
     update() {
-        if (!this.running) return
+        if (!this.running) return;
         if (this.fruit == undefined) this.generateNewFruit();
 
         this.direction = this.requestedDirection;
@@ -91,7 +91,7 @@ export default class Game {
         this.clearBackground(context);
         const {player} = this;
         const toRender = [...player.tail, this.fruit, player.head];
-        if(toRender.some(value => value == undefined)) return
+        if(toRender.some(value => value == undefined)) return;
         for (const index in toRender) {
             context.fillStyle = this.getColor(["head", "fruit"][toRender.length - 1 - index] ?? "tail");
             context.fillRect(...toRender[index].map(v => v * this.pixel.size), ...new Array(2).fill(this.pixel.size));

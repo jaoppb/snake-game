@@ -9,7 +9,7 @@ canvas.context = canvas.element.getContext('2d');
 
 export const screenManager = new ScreenManager(canvas);
 export const keyboardHandler = new Keyboard([screenManager]);
-screenManager.subscribe(game)
+screenManager.subscribe(game);
 
 window.addEventListener("load", setSize);
 window.addEventListener("resize", setSize);
