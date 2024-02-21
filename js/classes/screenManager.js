@@ -8,24 +8,30 @@ export default class ScreenManager {
 
     subscribe(screen) {
         this.screens.push(screen);
-        if(this.screens.length == 1) this.current = this.screens[0];
+        if (this.screens.length == 1) this.current = this.screens[0];
     }
 
     unsubscribe(screen) {
-        if(!this.screens.includes(screen)) return;
-        this.screens = this.screens.filter(e=>e!=screen);
+        if (!this.screens.includes(screen)) return;
+        this.screens = this.screens.filter(e => e != screen);
     }
 
     setSize() {
-        if(!(this.rendering && this.current)) return;
+        if (!(this.rendering && this.current)) return;
         this.current.setSize(this.canvas);
+    }
+
+    setScreen(object) {
+        const { screens } = this;
+        if (!screens.includes(object)) return;
+        this.current = screens[screens.indexOf(object)];
     }
 
     update() {
         this.tick++;
-        if(!this.current) return;
-        const {current, tick, canvas} = this;
-        if(tick % Math.round(100 / current.ups) == 0) current.update();
+        if (!this.current) return;
+        const { current, tick, canvas } = this;
+        if (tick % Math.round(100 / current.ups) == 0) current.update();
         current.render(canvas.context);
     }
 
