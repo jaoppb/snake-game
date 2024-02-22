@@ -21,7 +21,7 @@ function setSize() {
         let temp = Math.min(mainElement.offsetHeight, mainElement.offsetWidth) * 0.9;
         return temp - temp % 50;
     })()
-    element.width = element.height = size;
+    element.width = element.height = Math.max(size, 100);
     screenManager.setSize();
 }
 

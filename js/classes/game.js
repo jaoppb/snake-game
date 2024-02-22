@@ -39,7 +39,7 @@ export default class Game {
             case "s":
             case "d":
                 this.requestDirectionChange(this.directions[key]);
-            break;
+                break;
         }
     }
 
@@ -55,11 +55,19 @@ export default class Game {
     }
 
     setSize(canvas) {
-        this.size.total = canvas.element.width;
-        this.size.pixel = canvas.element.width / this.pixel.size;
+        const { size, player, pixel } = this;
+        const { element } = canvas;
+        const newSize = {
+            total: element.width,
+            pixel: element.width / pixel.size
+        };
+        if (size.total == newSize.total && size.pixel == newSize.pixel) return;
+        size.total = newSize.total;
+        size.pixel = newSize.pixel;
         this.requestedDirection = this.direction = [this.getRandomInt(2) ? -1 : 1, 0].sort(() => Math.random() - .5);
-        this.player.head = this.getRandomVector2(this.size.pixel);
-        this.player.tail = [[...this.player.head].map((v, i) => v - this.direction[i])];
+        player.head = this.getRandomVector2(this.size.pixel);
+        player.tail = [[...player.head].map((v, i) => v - this.direction[i])];
+        this.generateNewFruit();
     }
 
     generateNewFruit() {
@@ -89,9 +97,9 @@ export default class Game {
 
     render(context) {
         this.clearBackground(context);
-        const {player} = this;
+        const { player } = this;
         const toRender = [...player.tail, this.fruit, player.head];
-        if(toRender.some(value => value == undefined)) return;
+        if (toRender.some(value => value == undefined)) return;
         for (const index in toRender) {
             context.fillStyle = this.getColor(["head", "fruit"][toRender.length - 1 - index] ?? "tail");
             context.fillRect(...toRender[index].map(v => v * this.pixel.size), ...new Array(2).fill(this.pixel.size));
