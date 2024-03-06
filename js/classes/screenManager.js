@@ -1,14 +1,14 @@
 export default class ScreenManager {
-    constructor(canvas) {
+    constructor(mainElement) {
         this.rendering = true;
         this.screens = [];
-        this.canvas = canvas;
+        this.mainElement = mainElement;
         this.tick = 0;
     }
 
     subscribe(screen) {
         this.screens.push(screen);
-        if (this.screens.length == 1) this.current = this.screens[0];
+        if (this.screens.length == 1) this.setScreen(screen)
     }
 
     unsubscribe(screen) {
@@ -18,21 +18,24 @@ export default class ScreenManager {
 
     setSize() {
         if (!(this.rendering && this.current)) return;
-        this.current.setSize(this.canvas);
+        if (this.current.setSize) this.current.setSize();
     }
 
     setScreen(object) {
         const { screens } = this;
         if (!screens.includes(object)) return;
+        this.current?.removeElement();
         this.current = screens[screens.indexOf(object)];
+        this.current.load(this.mainElement);
+        this.setSize();
     }
 
     update() {
         this.tick++;
         if (!this.current) return;
-        const { current, tick, canvas } = this;
-        if (tick % Math.round(100 / current.ups) == 0) current.update();
-        current.render(canvas.context);
+        const { current, tick } = this;
+        if (current.update && tick % Math.round(100 / current.ups) == 0) current.update();
+        if (current.render) current.render();
     }
 
     keyboard(event) {

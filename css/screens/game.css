@@ -1,0 +1,73 @@
+.game {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.HUD {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 40px;
+}
+
+.back {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    transition: all 100ms;
+    margin-left: 3px;
+}
+
+.back:hover {
+    transform: scale(1.05);
+}
+
+.back:hover span {
+    background-color: #1d1d1d;
+}
+
+.back:active {
+    transform: scale(.96);
+}
+
+.back:active span {
+    background-color: #4d4d4d;
+}
+
+.back span {
+    position: absolute;
+    background-color: black;
+    height: 6px;
+    top: 50%;
+    width: 17px;
+}
+
+.back .span-0 {
+    transform: translateX(-3px) rotate(-45deg);
+    transform-origin: top left;
+}
+
+.back .span-1 {
+    transform: translateY(-50%);
+    width: 30px;
+}
+
+.back .span-2 {
+    transform: translate(-3px, -6px) rotate(45deg);
+    transform-origin: bottom left;
+}
+
+.score {
+    margin-right: 5px;
+    font-family: 'Ubuntu';
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+canvas {
+    image-rendering: pixelated;
+}
