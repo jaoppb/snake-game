@@ -14,14 +14,14 @@ export default class Menu extends ScreenBase {
         const title = this.elements.createChild(
             "title",
             document.createElement("span")
-        );
+        ) as HTMLElement;
         title.innerText = "Snake"
 
         const buttons = this.elements.createChild(
             "buttons",
             document.createElement("div"),
             true
-        );
+        ) as ElementHolder;
         const buttonFunctions = {
             start: () => {
                 game.setDifficult(levelIndex);
@@ -32,19 +32,21 @@ export default class Menu extends ScreenBase {
                 levelIndex++;
                 level.innerText = levelMeans[levelIndex % levelMeans.length]
             }
-        }
+        };
+        
         for (const buttonText of ["Start", "Difficult: "]) {
             const button = buttons.createChild(
                 buttonText.toLowerCase().replace(/[^a-z]/gi, ""),
                 document.createElement("button")
-            );
+            ) as HTMLElement;
             button.innerText = buttonText;
             button.addEventListener("click", buttonFunctions[buttonText.toLowerCase().replace(/[^a-z]/gi, "")])
-        }
+        };
+
         const level = buttons.children.difficult.createChild(
             "level",
             document.createElement("span")
-        )
-        level.innerText = levelMeans[levelIndex]
+        ) as HTMLElement;
+        level.innerText = levelMeans[levelIndex];
     }
 }

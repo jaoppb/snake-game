@@ -1,4 +1,11 @@
+import ScreenBase from "./screenBase";
+
 export default class ScreenManager {
+    rendering: boolean;
+    screens: ScreenBase[];
+    current: ScreenBase;
+    mainElement: HTMLElement;
+    tick: number;
     constructor(mainElement) {
         this.rendering = true;
         this.screens = [];
@@ -6,12 +13,12 @@ export default class ScreenManager {
         this.tick = 0;
     }
 
-    subscribe(screen) {
+    subscribe(screen: ScreenBase) {
         this.screens.push(screen);
         if (this.screens.length == 1) this.setScreen(screen)
     }
 
-    unsubscribe(screen) {
+    unsubscribe(screen: ScreenBase) {
         if (!this.screens.includes(screen)) return;
         this.screens = this.screens.filter(e => e != screen);
     }
@@ -21,11 +28,11 @@ export default class ScreenManager {
         if (this.current.setSize) this.current.setSize();
     }
 
-    setScreen(object) {
+    setScreen(screen: ScreenBase) {
         const { screens } = this;
-        if (!screens.includes(object)) return;
+        if (!screens.includes(screen)) return;
         this.current?.removeElement();
-        this.current = screens[screens.indexOf(object)];
+        this.current = screens[screens.indexOf(screen)];
         this.current.load(this.mainElement);
         this.setSize();
     }
@@ -38,7 +45,7 @@ export default class ScreenManager {
         if (current.render) current.render();
     }
 
-    keyboard(event) {
+    keyboard(event: KeyboardEvent) {
         this.current?.keyboard(event);
     }
 }

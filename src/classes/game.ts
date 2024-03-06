@@ -1,8 +1,50 @@
 import { screenManager } from "../index.js";
 import { menu } from "../screens/menu.js";
-import ScreenBase from "./screenBase.js";
+import ScreenBase, { ElementHolder } from "./screenBase.js";
+
+interface Score {
+    value: number,
+    element: HTMLElement
+};
+
+interface Player {
+    head: Vector2,
+    tail: Vector2[]
+};
+
+interface Pixel {
+    size: number,
+    total: number
+};
+
+interface Size {
+    pixel: number,
+    total: number
+};
+
+interface Canvas {
+    element: HTMLCanvasElement,
+    context: CanvasRenderingContext2D
+};
+
+type Vector2 = [number, number];
+
+type Direction = [number, number];
 
 export default class Game extends ScreenBase {
+    score: Score;
+    directions: Record<string, Direction>;
+    requestedDirection: Direction;
+    direction: Direction;
+    player: Player;
+    running: boolean;
+    colors: Record<string, string>;
+    background: string;
+    pixel: Pixel;
+    size: Record<string, number>;
+    canvas: Canvas;
+    fruit: Vector2;
+
     constructor() {
         super(document.createElement("div"), ["game"]);
 
@@ -10,28 +52,32 @@ export default class Game extends ScreenBase {
             "HUD",
             document.createElement("div"),
             true
-        )
+        ) as ElementHolder;
         const back = HUD.createChild(
             "back",
             document.createElement("div"),
             true
-        )
+        ) as ElementHolder;
         for (let i = 0; i < 3; i++) back.createChild(`span-${i}`, document.createElement("span"));
         back.element.addEventListener("click", () => screenManager.setScreen(menu));
-        this.score = {};
-        this.score.element = HUD.createChild(
-            "score",
-            document.createElement("span")
-        )
+        this.score = {
+            value: 0,
+            element: HUD.createChild(
+                "score",
+                document.createElement("span")
+            ) as HTMLElement
+        }
 
         const canvas = this.elements.createChild(
             "canvas",
             document.createElement("canvas")
-        )
+        ) as HTMLCanvasElement;
 
         this.ups = 3; //updates per second
-        this.pixel = {};
-        this.pixel.size = 50;
+        this.pixel = {
+            total: 0,
+            size: 50
+        };
         this.size = {};
         this.background = "#3f3f3f";
         this.colors = {
@@ -46,12 +92,13 @@ export default class Game extends ScreenBase {
             s: [0, 1],
             d: [1, 0]
         };
-        this.canvas = {};
-        this.canvas.element = canvas;
-        this.canvas.context = this.canvas.element.getContext('2d');
+        this.canvas = {
+            element: canvas as HTMLCanvasElement,
+            context: canvas.getContext('2d')
+        }
 
         this.keyboardEvents = {
-            any: event => {
+            any: (event: KeyboardEvent) => {
                 const key = event.key.toLowerCase();
                 switch (key) {
                     case "w":
@@ -62,27 +109,27 @@ export default class Game extends ScreenBase {
                         break;
                 }
             }
-        }
+        };
     }
 
     setGame() {
         this.player = {
-            head: [],
+            head: [0, 0],
             tail: []
         };
         this.running = true;
-        
+
         this.changeScore(0);
         this.setSize();
     }
 
-    getRandomInt = range => Math.floor(Math.random() * range);
+    getRandomInt = (range: number): number => Math.floor(Math.random() * range);
 
-    getRandomVector2 = range => [this.getRandomInt(range), this.getRandomInt(range)];
+    getRandomVector2 = (range: number): Vector2 => [this.getRandomInt(range), this.getRandomInt(range)];
 
-    getColor = target => this.colors[target] ?? this.colors.default;
+    getColor = (target: string) => this.colors[target] ?? this.colors.default;
 
-    setDifficult(level) {
+    setDifficult(level: number) {
         switch (level) {
             default:
             case 0:
@@ -100,24 +147,26 @@ export default class Game extends ScreenBase {
         }
     }
 
-    requestDirectionChange(newDir) {
+    requestDirectionChange(newDir: Direction) {
         if (!newDir.map(v => -v).every((v, i) => v !== this.direction[i])) return;
 
         this.requestedDirection = newDir;
     }
 
-    clearBackground(context) {
+    clearBackground(context: CanvasRenderingContext2D) {
         context.fillStyle = this.background;
         context.fillRect(0, 0, this.size.total, this.size.total);
     }
 
     setSize() {
-        const newSize = {};
-        newSize.total = (() => {
+        const total = (() => {
             let temp = Math.min(this.element.offsetWidth, this.element.offsetHeight) * .9
             return Math.max(150, temp - temp % this.pixel.size)
-        })()
-        newSize.pixel = newSize.total / this.pixel.size
+        })();
+        const newSize: Size = {
+            total: total,
+            pixel: total / this.pixel.size
+        }
 
         const { size } = this;
         if (Object.keys(newSize).every(key => size[key] != undefined)
@@ -128,9 +177,9 @@ export default class Game extends ScreenBase {
         for (const key of Object.keys(newSize)) size[key] = newSize[key];
         element.width = element.height = size.total
         this.elements.children.HUD.element.style.width = `${size.total}px`
-        this.requestedDirection = this.direction = [this.getRandomInt(2) ? -1 : 1, 0].sort(() => Math.random() - .5);
+        this.requestedDirection = this.direction = Object.values(this.directions)[Math.floor(Object.values(this.directions).length * Math.random())];
         player.head = this.getRandomVector2(this.size.pixel);
-        player.tail = [[...player.head].map((v, i) => v - this.direction[i])];
+        player.tail = [player.head.map((value, index) => value - this.direction[index]) as Vector2]
         this.generateNewFruit();
     }
 
@@ -139,29 +188,28 @@ export default class Game extends ScreenBase {
         while ([this.player.head, ...this.player.tail].some(v => v.every((v, i) => v == this.fruit[i])));
     }
 
-    changeScore(value) {
-        let final;
-        if (typeof value == "number") final = value
-        else final = this.score.value + 1
-        this.score.value = this.score.element.innerText = final
+    changeScore(value?: number) {
+        let final: number;
+        if (typeof value == "number") final = value;
+        else final = this.score.value + 1;
+        this.score.value = final;
+        this.score.element.innerText = final.toString();
     }
 
     update() {
-        if (!this.running) {
-            return screenManager.setScreen(menu)
-        };
+        if (!this.running) return screenManager.setScreen(menu);
         if (this.fruit == undefined) this.generateNewFruit();
 
         this.direction = this.requestedDirection;
 
         const { player } = this;
-        const headCopy = [...player.head];
+        const headCopy: Vector2 = [...player.head];
         player.head = player.head.map((v, i) => {
             let value = v + this.direction[i];
             if (value > this.size.pixel - 1) value %= this.size.pixel;
             else if (value < 0) value += this.size.pixel;
             return value;
-        })
+        }) as Vector2;
         player.tail.unshift(headCopy);
         if (player.head.every((v, i) => v == this.fruit[i])) {
             this.changeScore();
@@ -178,8 +226,8 @@ export default class Game extends ScreenBase {
         const toRender = [...player.tail, this.fruit, player.head];
         if (toRender.some(value => value == undefined)) return;
         for (const index in toRender) {
-            context.fillStyle = this.getColor(["head", "fruit"][toRender.length - 1 - index] ?? "tail");
-            context.fillRect(...toRender[index].map(v => v * this.pixel.size), ...new Array(2).fill(this.pixel.size));
+            context.fillStyle = this.getColor(["head", "fruit"][toRender.length - 1 - parseInt(index)] ?? "tail");
+            context.fillRect(...toRender[index].map(v => v * this.pixel.size) as Vector2, ...new Array(2).fill(this.pixel.size) as Vector2);
         }
     }
 }
